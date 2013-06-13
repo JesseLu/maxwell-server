@@ -1,4 +1,6 @@
-""" Server for Maxwell.
+""" Web server for Maxwell.
+
+    Allows users to upload simulations and download results through HTTP.
 
     Performs just three operations:
     1.  Receive job as a from client (POST).
@@ -12,9 +14,7 @@ import BaseHTTPServer
 from StringIO import StringIO
 import cgi, shutil, tempfile, sys, os
 from SocketServer import ThreadingMixIn
-
-my_dir = tempfile.mkdtemp() # Temporary directory that we will use.
-my_dir = "/tmp/maxwell-server-debug/"
+import maxwell_config
 
 class MaxwellHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """ Handler for the server. """
@@ -63,7 +63,7 @@ class MaxwellHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     
     def my_prefix(self):
         """ Produce the user-specific prefix for files. """
-        return my_dir + self.client_address[0] + ':'
+        return maxwell_config.path + self.client_address[0] + ':'
       
     def do_HEAD(self):
         """ Returns the number of jobs in queue. """
@@ -71,8 +71,7 @@ class MaxwellHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header('Content-type', 'maxwell!')
         self.end_headers()
 
-        num_requests = len([f for f in os.listdir(my_dir) \
-                            if f[-len('.request'):] == '.request'])
+        num_requests = len(maxwell_config.list_requests())
         shutil.copyfileobj(StringIO("%d jobs pending" % num_requests), \
                             self.wfile)
 
