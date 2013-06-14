@@ -10,6 +10,7 @@
 
 import os, time
 import maxwell_config
+import subprocess, shlex
 
 def find_oldest_job():
     req = maxwell_config.list_requests() # Get the requests.
@@ -23,17 +24,27 @@ def find_oldest_job():
     return min(req_with_time) # Run this job.
 
 if __name__ == '__main__':
+    path_to_solver_dir = os.path.abspath(__file__).replace( \
+                            __file__.split('/')[-1], 'maxwell-solver') + '/'
     while True:
-        job = find_oldest_job()
+        req = find_oldest_job()
+        job = req.rstrip('.request')
         if job:
             print "Solving %s..." % job
-            os.remove(maxwell_config.path + job)
-            try:
-                # Solve it!
-                pass
-            except:
-                pass
-
+            # os.remove(maxwell_config.path + job)
+            return_code = subprocess.call(shlex.split( \
+                                           "mpirun -n 3 python " + \
+                                           path_to_solver_dir + "fdfd.py " + \
+                                           maxwell_config.path + job))
+               
+#             try:
+#                 # Solve it!
+#                subprocess.check_output(shlex.split( \
+#                    "mpirun -n 3 python maxwell-solver/fdfd.py " + path + job, \
+#                    stderr=subprocess.STDOUT))
+#             except:
+#                 pass
+        break
         time.sleep(1)
 
 
