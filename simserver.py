@@ -21,30 +21,35 @@ def find_oldest_job():
     for r in req:
         req_with_time[r] = os.stat(maxwell_config.path + r).st_ctime
 
-    return min(req_with_time) # Run this job.
+    oldest_req = min(req_with_time) # Run this job.
+    os.remove(maxwell_config.path + oldest_req)
+    return oldest_req.rstrip('.request')
 
 if __name__ == '__main__':
     path_to_solver_dir = os.path.abspath(__file__).replace( \
                             __file__.split('/')[-1], 'maxwell-solver') + '/'
     while True:
-        req = find_oldest_job()
-        job = req.rstrip('.request')
-        if job:
+        job = find_oldest_job()
+
+        if not job:
+            time.sleep(1)
+            continue
+
+        else:
             print "Solving %s..." % job
             # os.remove(maxwell_config.path + job)
+            out_file = open(maxwell_config.path + job + '.log', 'w')
             return_code = subprocess.call(shlex.split( \
                                            "mpirun -n 3 python " + \
                                            path_to_solver_dir + "fdfd.py " + \
-                                           maxwell_config.path + job))
+                                           maxwell_config.path + job), \
+                                           stdout=out_file, stderr=subprocess.STDOUT)
+            out_file.close()
+
+            # Used to let user know that files can be downloaded.
+            f = open(maxwell_config.path + job + '.finished', 'w')
+            f.write('Finished')
+            f.close()
                
-#             try:
-#                 # Solve it!
-#                subprocess.check_output(shlex.split( \
-#                    "mpirun -n 3 python maxwell-solver/fdfd.py " + path + job, \
-#                    stderr=subprocess.STDOUT))
-#             except:
-#                 pass
-        break
-        time.sleep(1)
 
 
