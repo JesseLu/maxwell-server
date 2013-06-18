@@ -48,8 +48,9 @@ class MaxwellHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.do_HEAD()
             return
 
+        fname = self.my_prefix() + self.path.lstrip('/')
         try:
-            f = open(self.my_prefix() + self.path.lstrip('/'), 'rb')
+            f = open(fname, 'rb')
         except:
             self.send_error(404, "File not found.")
             return
@@ -59,6 +60,16 @@ class MaxwellHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.end_headers()
         shutil.copyfileobj(f, self.wfile)
         f.close()
+
+        # If ends with something like .E_xr then delete the file.
+        ending = fname.split('.')[-1]
+        if len(ending) == 4 and \
+            ending[0] in 'EH' and \
+            ending[1] == '_' and \
+            ending[2] in 'xyz' and \
+            ending [3] in 'ri':
+            os.remove(fname)
+
         # print self.client_address
     
     def my_prefix(self):
