@@ -7,7 +7,7 @@
     2.  Return job status or simulation result to client (GET).
     3.  Return queue status to client (HEAD).
 
-    Defaults to use port 8008.
+    Defaults to use port 80.
 """
 
 import BaseHTTPServer
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     if len(sys.argv) == 2:
         port = int(sys.argv[1])
     else:
-        port = 8008
+        port = 80
 
     server_address = ("", port)
     print "Serving at", server_address
