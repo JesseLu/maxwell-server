@@ -29,13 +29,18 @@ class MaxwellHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         # "{ip}-" prefix added in front of file name.
         try:
-            f = open(self.my_prefix() + form['key'].value, 'w')
+            filename = self.my_prefix() + form['key'].value
+            f = open(filename, 'w')
         except:
-            self.send_error(404, "Upload failed.")
+            self.send_error(400, "Upload failed.")
             return
 
+        # Save file.
         shutil.copyfileobj(form['file'].file, f)
         f.close()
+
+#         # Open permissions on file.
+#         os.chmod(filename, 0777)
 
         self.send_response(200)
         self.send_header('Content-type', 'maxwell!')
