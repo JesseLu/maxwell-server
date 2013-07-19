@@ -88,8 +88,8 @@ class MaxwellHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.end_headers()
 
         num_requests = len(maxwell_config.list_requests())
-        shutil.copyfileobj(StringIO("%d jobs pending" % num_requests), \
-                            self.wfile)
+        shutil.copyfileobj(StringIO("%d jobs pending (maxwell-server)" \
+                            % num_requests), self.wfile)
 
 class ThreadingHTTPServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
     """ We use a multi-process version of BaseHTTPServer. """
